@@ -22,30 +22,30 @@
     </header>
 
     <main>
-        <!-- 初回PW変更モーダル -->
-    <div id="pwModal" class="modal-backdrop hidden" aria-hidden="true">
-    <div class="pw-modal">
-        <h2>初回パスワード変更</h2>
-        <p>初期パスワードのままだと操作できません。新しいパスワードを設定してください。</p>
+      <!-- 初回PW変更モーダル -->
+      <div id="pwModal" class="modal-backdrop hidden" aria-hidden="true">
+        <div class="pw-modal">
+          <h2>初回パスワード変更</h2>
+          <p>初期パスワードのままだと操作できません。新しいパスワードを設定してください。</p>
 
-        <label>
-        新しいパスワード
-        <input id="newPw1" type="password" autocomplete="new-password" />
-        </label>
+          <label>
+            新しいパスワード
+            <input id="newPw1" type="password" autocomplete="new-password" />
+          </label>
 
-        <label>
-        もう一度
-        <input id="newPw2" type="password" autocomplete="new-password" />
-        </label>
+          <label>
+            もう一度
+            <input id="newPw2" type="password" autocomplete="new-password" />
+          </label>
 
-        <div class="row">
-        <button id="pwSaveBtn">変更する</button>
-        <button id="pwLogoutBtn" class="sub">ログイン画面へ戻る</button>
+          <div class="row">
+            <button id="pwSaveBtn">変更する</button>
+            <button id="pwLogoutBtn" class="sub">ログイン画面へ戻る</button>
+          </div>
+
+          <p id="pwErr" class="err"></p>
         </div>
-
-        <p id="pwErr" class="err"></p>
-    </div>
-    </div>
+      </div>
 
       <!-- タブバー -->
       <div class="tab-bar">
@@ -99,7 +99,9 @@
           <div class="product-header">
             <h2>在庫</h2>
           </div>
+
           <div class="product-container" id="productContainer"></div>
+
           <nav>
             <button id="add">＋</button>
             <button id="remove">ー</button>
@@ -121,70 +123,71 @@
 
       <!-- 売上 -->
       <section id="salesTab" class="tab-content">
-        <div id="mainContainer">
-          <div class="product-header" id="flexcontents">
-            <h2>売上履歴</h2>
-            <h2>売上集計</h2>
+        <div class="sales-layout">
+          <!-- 左上：見出し -->
+          <h2 class="sales-h2 sales-h2-history">売上履歴</h2>
+          <!-- 右上：見出し -->
+          <h2 class="sales-h2 sales-h2-summary">売上集計</h2>
+
+          <!-- 左下：履歴 -->
+          <div class="sales-history">
+            <div class="sales-container" id="salesContainer"></div>
           </div>
 
-          <div id="flexcontents">
-            <div class="sales-container" id="salesContainer"></div>
+          <!-- 右下：グラフ -->
+          <div class="sales-chart" id="PIE">
+            <canvas id="salesPie"></canvas>
+          </div>
+        </div>
 
-            <div id="salesModal" class="modal">
-              <div class="modal-content">
-                <div id="SmodalHeader"></div>
-                <div id="SmodalDate"></div>
-                <nav>
-                  <button id="cancelSalesBtn">売上取消</button>
-                  <button id="ScloseModal">戻る</button>
-                </nav>
-              </div>
-            </div>
-
-            <div id="PIE">
-              <canvas id="salesPie"></canvas>
-            </div>
+        <!-- モーダルはレイアウトの外（被せ物） -->
+        <div id="salesModal" class="modal">
+          <div class="modal-content">
+            <div id="SmodalHeader"></div>
+            <div id="SmodalDate"></div>
+            <nav>
+              <button id="cancelSalesBtn">売上取消</button>
+              <button id="ScloseModal">戻る</button>
+            </nav>
           </div>
         </div>
       </section>
 
       <!-- QR発行 -->
-        <section id="qrTab" class="tab-content">
+      <section id="qrTab" class="tab-content">
         <h2>QR発行</h2>
         <p>View / Cash 用のURLとQRコードを発行します（token 付与）。</p>
 
         <div style="display:flex; gap:10px; flex-wrap:wrap;">
-            <button id="genViewQr" style="width:auto;">View用 生成</button>
-            <button id="genCashQr" style="width:auto;">Cash用 生成</button>
+          <button id="genViewQr" style="width:auto;">View用 生成</button>
+          <button id="genCashQr" style="width:auto;">Cash用 生成</button>
         </div>
 
         <hr style="border:none; border-top:1px solid #d2bdf7; margin:12px 0;">
 
         <!-- 共通表示エリア -->
         <div class="qr-panel">
-            <div class="qr-meta">
+          <div class="qr-meta">
             <span id="qrTypeBadge" class="qr-badge">未生成</span>
             <span id="qrHint" class="qr-hint">ここにURLとQRが表示されます</span>
-            </div>
+          </div>
 
-            <input id="qrUrl" type="text" readonly placeholder="URLがここに表示される">
+          <input id="qrUrl" type="text" readonly placeholder="URLがここに表示される">
 
-            <div style="display:flex; gap:10px; flex-wrap:wrap; align-items:center;">
+          <div style="display:flex; gap:10px; flex-wrap:wrap; align-items:center;">
             <button id="copyQrUrl" style="width:auto;" disabled>URLコピー</button>
             <button id="dlQr" style="width:auto;" disabled>QRダウンロード</button>
-            </div>
+          </div>
 
-            <canvas id="qrCanvas"></canvas>
+          <canvas id="qrCanvas"></canvas>
         </div>
 
         <p id="qrStatus" style="margin-top:10px;"></p>
-        </section>
-
-
+      </section>
     </main>
   </div>
 
-  <!-- タブ切替（今まで無かった/壊れてたならこれが必要） -->
+  <!-- タブ切替 -->
   <script>
     const tabButtons = document.querySelectorAll(".tab-btn");
     const tabContents = document.querySelectorAll(".tab-content");
@@ -203,6 +206,6 @@
     });
   </script>
 
- <script type="module" src="js/admin.js"></script>
+  <script type="module" src="js/admin.js"></script>
 </body>
 </html>

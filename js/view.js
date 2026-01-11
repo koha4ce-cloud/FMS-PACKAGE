@@ -177,3 +177,14 @@ document.addEventListener("DOMContentLoaded", async () => {
   loadNotices(noticeRef);
   loadSchedule(schedulesCol);
 });
+
+// ===== 文字数に応じてフォントサイズ調整 =====
+document.querySelectorAll(".name").forEach(el => {
+  const len = el.textContent.trim().length;
+
+  if (len >= 12) {
+    el.classList.add("xsmall");
+  } else if (len >= 8) {
+    el.classList.add("small");
+  }
+});

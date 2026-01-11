@@ -1,8 +1,7 @@
 // js/sale.js
 import { db } from "./firebase.js";
-import {
-  collection, query, orderBy, onSnapshot,
-} from "https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore.js";
+import { collection, query, orderBy, onSnapshot } from
+  "https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore.js";
 
 export function initSale(classId, audit) {
   const salesCol = collection(db, "Classes", classId, "Sales");
@@ -11,13 +10,88 @@ export function initSale(classId, audit) {
   const container = document.getElementById("salesContainer");
 
   const modal = document.getElementById("salesModal");
-  const modalHeader = document.getElementById("SmodalHeader");
-  const modalBody = document.getElementById("SmodalDate");
   const closeBtn = document.getElementById("ScloseModal");
   const cancelBtn = document.getElementById("cancelSalesBtn");
 
   const pieCanvas = document.getElementById("salesPie");
   let pieChart = null;
+
+  // ---- 円グラフ描画（Chart.jsファイル無し=CDNのwindow.Chart利用）----
+  function renderPie(byProduct) {
+    if (!pieCanvas) return;
+
+    const ChartLib = window.Chart;
+    if (!ChartLib) {
+      console.warn("Chart.js が読み込まれていません（window.Chart が undefined）");
+      return;
+    }
+
+    // タブが display:none の瞬間に描くと幅0で死ぬ → 次フレームに回す
+    const rect = pieCanvas.getBoundingClientRect();
+    if (rect.width === 0 || rect.height === 0) {
+      requestAnimationFrame(() => renderPie(byProduct));
+      return;
+    }
+
+    const labels = Array.from(byProduct.keys());
+    const values = Array.from(byProduct.values());
+
+    // データなし：グラフを消す
+    if (labels.length === 0) {
+      if (pieChart) {
+        pieChart.destroy();
+        pieChart = null;
+      }
+      const ctx = pieCanvas.getContext("2d");
+      ctx && ctx.clearRect(0, 0, pieCanvas.width, pieCanvas.height);
+      return;
+    }
+
+    if (pieChart) {
+      pieChart.data.labels = labels;
+      pieChart.data.datasets[0].data = values;
+      pieChart.update();
+      return;
+    }
+
+    pieChart = new ChartLib(pieCanvas, {
+      type: "pie",
+      data: {
+        labels,
+        datasets: [{ data: values }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false, // ←親(#PIE)の高さで制御
+        plugins: {
+          legend: { position: "bottom" },
+          tooltip: {
+            callbacks: {
+              label: (ctx) => {
+                const name = ctx.label ?? "";
+                const v = Number(ctx.parsed ?? 0);
+                const total = values.reduce((a, b) => a + b, 0);
+                const pct = total > 0 ? Math.round((v / total) * 100) : 0;
+                return `${name}: ${v}円 (${pct}%)`;
+              }
+            }
+          }
+        }
+      }
+    });
+  }
+
+  // 売上タブを開いた時にサイズ再計算（タブUI対策）
+  const salesTab = document.getElementById("salesTab");
+  if (salesTab) {
+    new MutationObserver(() => {
+      if (salesTab.classList.contains("active") && pieChart) {
+        pieChart.resize();
+        pieChart.update();
+      }
+    }).observe(salesTab, { attributes: true, attributeFilter: ["class"] });
+  }
+  // ---- 追加ここまで ----
 
   if (closeBtn) {
     closeBtn.addEventListener("click", () => {
@@ -36,14 +110,12 @@ export function initSale(classId, audit) {
 
     if (snap.size === 0) {
       container.innerHTML = "<p>売上がまだありません。</p>";
-      if (typeof renderPie === "function") renderPie(byProduct);
+      renderPie(byProduct);
       return;
     }
 
     snap.forEach((ds) => {
-      const saleId = ds.id;
       const d = ds.data();
-
       const status = d.status ?? "Active";
       const total = Number(d.total ?? 0);
 
@@ -71,11 +143,6 @@ export function initSale(classId, audit) {
           <div>${badge}</div>
         </div>
       `;
-
-      card.addEventListener("click", () => {
-        audit?.("SALE_CARD_OPEN", { classId, saleId });
-        if (typeof openSaleModal === "function") openSaleModal(classId, saleId, d);
-      });
       container.appendChild(card);
 
       if (status !== "Canceled") {
@@ -88,6 +155,6 @@ export function initSale(classId, audit) {
       }
     });
 
-    if (typeof renderPie === "function") renderPie(byProduct);
+    renderPie(byProduct);
   });
 }

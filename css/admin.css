@@ -1,27 +1,50 @@
 /* =========================
    admin.css（統合版）
-   - 旧モーダル(.modal)と
-     新モーダル(.modal-backdrop + .pw-modal)を共存
+   - 旧モーダル(.modal)と新モーダル(.modal-backdrop + .pw-modal)を共存
+   - スマホ時に「背景が伸びない/スクロールできない/固定高さで詰む」を最小修正
+   - 売上タブ：sales-layout（Grid）で並び順固定
    ========================= */
 
-/* ===== 全体ベース ===== */
+
+/* =========================
+   1) 全体ベース
+   ========================= */
 * {
   box-sizing: border-box;
 }
 
-html,
-body {
-  font-family: 'Potta One', sans-serif;
+html {
+  min-height: 100%;
   background: linear-gradient(180deg, #cde0f7, #d7c6f3);
-  margin: 0 auto;
-  display: flex;
-  justify-content: center;
-  height: 100%;
-  overflow: hidden;
 }
 
+body {
+  font-family: 'Potta One', sans-serif;
+  margin: 0;
+  min-height: 100dvh;
+
+  /* 背景はhtml側。bodyは透過でOK */
+  background: transparent;
+
+  /* スクロール可能に（スマホ詰み対策） */
+  overflow-x: hidden;
+  overflow-y: auto;
+
+  /* 既存の中央寄せ思想は維持：container側で整える */
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+}
+/* タブの中身の箱を中央に置く */
+.tab-content.active {
+  margin: 0 auto;
+}
 p {
   text-align: center;
+}
+
+main {
+  padding: 20px;
 }
 
 .logo {
@@ -29,11 +52,10 @@ p {
   height: 80px;
 }
 
-main {
-  padding: 20px;
-}
 
-/* ===== コンテナ系（admin.html側の .container を想定） ===== */
+/* =========================
+   2) コンテナ / ヘッダ
+   ========================= */
 .container,
 .admin-container {
   width: 95%;
@@ -60,7 +82,10 @@ header h1 {
   gap: 12px;
 }
 
-/* ===== タブバー ===== */
+
+/* =========================
+   3) タブバー
+   ========================= */
 .tab-bar {
   display: flex;
   justify-content: space-around;
@@ -89,7 +114,10 @@ header h1 {
   box-shadow: inset 0 2px 6px rgba(0, 0, 0, .15);
 }
 
-/* ===== タブ中身 ===== */
+
+/* =========================
+   4) タブ中身
+   ========================= */
 .tab-content {
   display: none;
   background: #f3edff;
@@ -99,6 +127,7 @@ header h1 {
   animation: fadeIn 0.3s ease;
 }
 
+/* PCは今まで通りの見た目を維持（650px） */
 .tab-content.active {
   display: block;
   width: 650px;
@@ -107,18 +136,14 @@ header h1 {
 }
 
 @keyframes fadeIn {
-  from {
-    opacity: 0;
-    transform: translateY(10px);
-  }
-
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
+  from { opacity: 0; transform: translateY(10px); }
+  to   { opacity: 1; transform: translateY(0); }
 }
 
-/* ===== 見出し ===== */
+
+/* =========================
+   5) 見出し / 文字
+   ========================= */
 h2 {
   color: #5a3fb9;
   border-left: 5px solid #b8a2ff;
@@ -127,7 +152,10 @@ h2 {
   font-size: 20px;
 }
 
-/* ===== フォーム ===== */
+
+/* =========================
+   6) フォーム / ボタン
+   ========================= */
 textarea,
 input {
   width: 100%;
@@ -157,12 +185,14 @@ button:hover {
   background: #9a84f3;
 }
 
-/* 小さめボタン用 */
 button.sub {
   opacity: .85;
 }
 
-/* ===== リスト ===== */
+
+/* =========================
+   7) リスト
+   ========================= */
 ul {
   list-style: none;
   padding: 0;
@@ -201,7 +231,10 @@ li button:hover {
   overflow-y: scroll;
 }
 
-/* ===== シフト ===== */
+
+/* =========================
+   8) シフト
+   ========================= */
 #shiftTableContainer {
   overflow: auto;
   margin-top: 10px;
@@ -242,7 +275,10 @@ li button:hover {
   flex: 1;
 }
 
-/* ===== 在庫 ===== */
+
+/* =========================
+   9) 在庫
+   ========================= */
 .product-container {
   background: #f3edff;
   border-radius: 20px;
@@ -289,9 +325,16 @@ li button:hover {
   font-size: 13px;
 }
 
-/* ===== 旧モーダル（在庫/売上で使用：#eventModal, #salesModal など） =====
-   こっちは "背景も含めて.modal" の方式
-*/
+nav {
+  display: flex;
+  justify-content: space-around;
+  width: 100%;
+}
+
+
+/* =========================
+   10) モーダル（旧：.modal）
+   ========================= */
 .modal {
   display: none;
   position: fixed;
@@ -322,7 +365,10 @@ li button:hover {
   width: auto;
 }
 
-/* ===== バッジ ===== */
+
+/* =========================
+   11) バッジ
+   ========================= */
 .event-count {
   display: block;
   background: #b46ff7;
@@ -338,19 +384,19 @@ li button:hover {
   margin-right: auto;
 }
 
-nav {
-  display: flex;
-  justify-content: space-around;
-  width: 100%;
-}
 
-/* ===== 売上 ===== */
+/* =========================
+   12) 売上（既存ベース + 新レイアウト）
+   ========================= */
+
+/* 売上履歴一覧（中身が多いので縦スクロール） */
 .sales-container {
-  width: 200px;
+  width: 200px;      /* PCの既存感を維持 */
   height: 400px;
   overflow-y: scroll;
 }
 
+/* 旧ボタン系（残してOK） */
 .sale-btn {
   width: 100%;
   padding: 12px;
@@ -363,16 +409,51 @@ nav {
   background-color: gray;
 }
 
+/* ----- 新：売上タブの並び順固定（Grid） ----- */
+.sales-layout {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  grid-template-areas:
+    "h_history h_summary"
+    "history   chart";
+  gap: 12px;
+  align-items: start;
+}
+
+.sales-h2 {
+  margin: 0;
+}
+
+.sales-h2-history { grid-area: h_history; }
+.sales-h2-summary { grid-area: h_summary; }
+
+.sales-history { grid-area: history; }
+
+/* chart枠：PCは今までの「右にグラフ」感を維持 */
+.sales-chart {
+  grid-area: chart;
+  width: 350px;      /* 既存#PIEの幅感 */
+  max-width: 420px;
+  margin: 0 auto;
+  height: 320px;     /* ← Chart.jsのための高さ（重要） */
+}
+
+/* 既存IDも生かす（JSが#PIEを参照してもOK） */
 #PIE {
   width: 350px;
+  height: 320px;
 }
 
-#flexcontents {
-  display: flex;
-  justify-content: space-around;
+#salesPie {
+  width: 100% !important;
+  height: 100% !important;
+  display: block;
 }
 
-/* ===== 表の延命処置 ===== */
+
+/* =========================
+   13) 表の延命処置
+   ========================= */
 .member-name-input {
   width: 100%;
   border: none;
@@ -390,7 +471,10 @@ nav {
   border-radius: 6px;
 }
 
-/* ===== QR発行（共通表示エリア） ===== */
+
+/* =========================
+   14) QR発行
+   ========================= */
 .qr-panel {
   margin-top: 8px;
   padding: 12px;
@@ -404,6 +488,7 @@ nav {
   gap: 10px;
   align-items: center;
   margin-bottom: 8px;
+  flex-wrap: wrap; /* スマホで溢れない */
 }
 
 .qr-badge {
@@ -432,6 +517,7 @@ nav {
   font-size: 12px;
   color: #4a0072;
   opacity: .85;
+  word-break: break-word;
 }
 
 #qrCanvas {
@@ -444,12 +530,10 @@ nav {
   border-radius: 12px;
 }
 
-/* ===== 新モーダル（初回PW変更）=====
-   HTMLは:
-   <div id="pwModal" class="modal-backdrop hidden">
-     <div class="pw-modal">...</div>
-   </div>
-*/
+
+/* =========================
+   15) 新モーダル（初回PW変更）
+   ========================= */
 .modal-backdrop.hidden {
   display: none;
 }
@@ -464,7 +548,6 @@ nav {
   z-index: 9999;
 }
 
-/* 初回PWモーダルの中身は .pw-modal にして衝突回避 */
 .pw-modal {
   width: min(520px, 92vw);
   background: #fff;
@@ -491,24 +574,76 @@ nav {
   margin-top: 10px;
 }
 
-/* ===== レスポンシブ ===== */
-@media (max-width: 768px) {
-  * {
-    outline: 1px solid red;
-  }
 
+/* =========================
+   16) 文字数に応じてサイズ調整
+   ========================= */
+.name {
+  white-space: nowrap;
+  font-size: 14px;
+  transition: font-size .2s;
+}
+
+.name.small {
+  font-size: 11px;
+}
+
+.name.xsmall {
+  font-size: 9.5px;
+}
+
+
+/* =========================
+   17) レスポンシブ（スマホ）
+   ========================= */
+@media (max-width: 768px) {
+  /* デバッグ赤枠は消す（赤い線の犯人） */
+  /* * { outline: 1px solid red; } */
+
+  /* タブ中身：スマホは画面に合わせる（固定350px/475pxは撤去） */
   .tab-content.active {
-    width: 350px;
-    height: 475px;
+    width: 100%;
+    max-width: 100%;
+    height: auto;
   }
 
   #noticeList,
   #scheduleList {
-    height: 40%;
-    overflow-y: scroll;
+    height: 40vh;
+    overflow-y: auto;
   }
 
+  /* 売上：スマホは「履歴→一覧→集計→グラフ」の順に固定 */
+  .sales-layout {
+    grid-template-columns: 1fr;
+    grid-template-areas:
+      "h_history"
+      "history"
+      "h_summary"
+      "chart";
+  }
+
+  /* 履歴：横幅いっぱい＆高さは画面の一部 */
+  .sales-container {
+    width: 100%;
+    height: auto;
+    max-height: 45vh;
+    overflow-y: auto;
+  }
+
+  /* グラフ：画面に収まるように */
+  .sales-chart,
   #PIE {
-    width: 50%;
+    width: 100%;
+    max-width: 420px;
+    margin: 0 auto;
+    height: 320px;
+  }
+
+  /* QR：画面幅に合わせて縮む */
+  #qrCanvas {
+    width: min(260px, 85vw);
+    height: auto;
+    aspect-ratio: 1 / 1;
   }
 }
