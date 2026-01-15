@@ -1,6 +1,6 @@
 // js/sale.js
 import { db } from "./firebase.js";
-import { collection, query, orderBy, onSnapshot } from
+import { doc, collection, query, orderBy, onSnapshot, updateDoc } from
   "https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore.js";
 
 export function initSale(classId, audit) {
@@ -34,7 +34,7 @@ export function initSale(classId, audit) {
     }
 
     const labels = Array.from(byProduct.keys());
-    const values = Array.from(byProduct.values());
+const values = Array.from(byProduct.values()).map(v => v.sales);
 
     // データなし：グラフを消す
     if (labels.length === 0) {
@@ -116,6 +116,7 @@ export function initSale(classId, audit) {
 
     snap.forEach((ds) => {
       const d = ds.data();
+      const dId = ds.id;
       const status = d.status ?? "Active";
       const total = Number(d.total ?? 0);
 
@@ -133,9 +134,9 @@ export function initSale(classId, audit) {
       const badge = status === "Canceled"
         ? `<span style="color:#fff;background:#999;padding:2px 8px;border-radius:999px;font-size:12px;">取消</span>`
         : `<span style="color:#fff;background:#4caf50;padding:2px 8px;border-radius:999px;font-size:12px;">有効</span>`;
-
+      //divタグにID付与。ボタンを押すと有効無効切り替えのファンクション呼び出し
       card.innerHTML = `
-        <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;">
+        <div id="salesBtn" style="display:flex;justify-content:space-between;align-items:center;gap:8px;">
           <div>
             <div style="font-weight:700;">合計：${total}円</div>
             <div style="font-size:12px;opacity:.75;">${dtStr}</div>
@@ -143,18 +144,92 @@ export function initSale(classId, audit) {
           <div>${badge}</div>
         </div>
       `;
+
+      card.addEventListener("click", () => switchBatch(d, dId));
+
       container.appendChild(card);
 
       if (status !== "Canceled") {
         const items = Array.isArray(d.items) ? d.items : [];
         for (const it of items) {
           const name = String(it.product_name ?? "不明");
-          const subtotal = Number(it.subtotal ?? (Number(it.price ?? 0) * Number(it.quantity ?? 0)));
-          byProduct.set(name, (byProduct.get(name) ?? 0) + subtotal);
+          const qty = Number(it.quantity ?? 0);
+          const subtotal = Number(it.subtotal ?? 0);
+          if (!byProduct.has(name)) {
+            byProduct.set(name, {
+              qty: 0,
+              sales: 0
+            });
+          }
+          const row = byProduct.get(name);
+          row.qty += qty;
+          row.sales += subtotal;
         }
       }
-    });
 
+    });
+    renderSalesSummary(byProduct);
     renderPie(byProduct);
   });
+
+  async function switchBatch(d, dId) {
+    const newStatus = d.status === "Active" ? "Canceled" : "Active";
+    try {
+      await updateDoc(
+        doc(db, "Classes", classId, "Sales", dId),
+        {
+          status: newStatus
+        }
+      );
+      audit?.("SALES_UPDATE", {
+        classId,
+        salesId: dId,
+        status: newStatus
+      });
+    } catch (e) {
+      console.error("編集失敗", e);
+      alert("編集に失敗しました（権限/通信）");
+    }
+  }
+
+  function renderSalesSummary(byProduct) {
+    const el = document.getElementById("salesSummary");
+    console.log("render")
+    if (!el) return;
+
+    let totalSales = 0;
+
+    let html = `
+      <table style="width:100%;border-collapse:collapse;">
+        <tr>
+          <th>商品</th>
+          <th>数量</th>
+          <th>売上</th>
+        </tr>
+    `;
+
+    byProduct.forEach((v, name) => {
+      totalSales += v.sales;
+
+      html += `
+        <tr>
+          <td>${name}</td>
+          <td>${v.qty}</td>
+          <td>${v.sales}円</td>
+        </tr>
+      `;
+    });
+
+    html += `
+      </table>
+      <hr>
+      <h4>売上合計：<b>${totalSales}円</b></h4>
+    `;
+
+    el.innerHTML = html;
+    console.log("表示")
+  }
+
+
 }
+

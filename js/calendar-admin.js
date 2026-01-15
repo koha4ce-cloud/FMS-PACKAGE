@@ -27,8 +27,6 @@ function resolveClassId() {
     ?? localStorage.getItem("classId");
 
   if (!cid) {
-    alert("クラス情報が取得できません。ログインし直してください。");
-    location.href = "login.html";
     throw new Error("classId missing");
   }
   return cid;
