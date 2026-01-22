@@ -70,6 +70,10 @@ document.addEventListener("DOMContentLoaded", () => {
       alert("クラスIDは英数字・_・- のみ使用できます");
       return;
     }
+    if (cid < 0) {
+      alert("クラスIDに小数点は使えません");
+      return;
+    }
     try {
       console.log("CREATE STEP 1:", { cid, cnt });
 
