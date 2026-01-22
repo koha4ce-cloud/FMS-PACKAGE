@@ -122,7 +122,7 @@ export function initStock(classId, audit) {
     const stock = Number(document.getElementById("stock")?.value);
     const cost = Number(document.getElementById("cost")?.value);
 
-    if (!name || Number.isNaN(price) || Number.isNaN(stock) || Number.isNaN(cost)) {
+    if (!name && Number.isNaN(price) && Number.isNaN(stock) && Number.isNaN(cost)) {
       alert("すべての項目を正しく入力してください。");
       return;
     }

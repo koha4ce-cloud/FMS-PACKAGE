@@ -62,18 +62,14 @@ document.addEventListener("DOMContentLoaded", () => {
       alert("すべての項目を入力してください");
       return;
     }
-    if (cnt > 10) {
-      alert("委員数は10名までです！");
-      return;
-    }
     if (!/^[A-Za-z0-9_-]{1,30}$/.test(cid)) {
       alert("クラスIDは英数字・_・- のみ使用できます");
       return;
     }
-    if (cnt != Math.floor(cnt)) {
-      alert("クラスIDに小数点は使えません");
+    if (!/^([1-9]|10)$/.test(cnt)) {
+      alert("クラス委員数は1〜10の整数のみです");
       return;
-    }
+    }    
     try {
       console.log("CREATE STEP 1:", { cid, cnt });
 
