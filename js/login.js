@@ -70,7 +70,7 @@ document.addEventListener("DOMContentLoaded", () => {
       alert("クラスIDは英数字・_・- のみ使用できます");
       return;
     }
-    if (cid < 0) {
+    if (cnt != Math.floor(cnt)) {
       alert("クラスIDに小数点は使えません");
       return;
     }
