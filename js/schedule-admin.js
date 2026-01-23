@@ -129,29 +129,35 @@ document.addEventListener("DOMContentLoaded", () => {
   // ---- 追加 ----
   addBtn.addEventListener("click", async (e) => {
     e.preventDefault(); // form事故保険
-
+  
     const dateStr = String(dateEl.value || "");   // "YYYY-MM-DD"
     const text = String(detailEl.value || "").trim();
-
+  
     if (!dateStr || !text) {
       alert("日付と内容を入力");
       return;
     }
-
+  
+    if (text.length > 20) {
+      alert("内容は20文字以内で入力してください");
+      return;
+    }
+  
     // date input はローカル日付。0:00固定で Timestamp 化
     const date = new Date(`${dateStr}T00:00:00`);
-
+  
     try {
       await addDoc(schedulesCol, {
         text,
         date: Timestamp.fromDate(date),
         created_at: serverTimestamp(),
       });
-
+  
       detailEl.value = "";
     } catch (e2) {
       console.error("[schedule-admin] add error:", e2);
       alert("追加に失敗しました（権限/通信）");
     }
   });
+  
 });

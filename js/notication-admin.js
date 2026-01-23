@@ -133,15 +133,21 @@ document.addEventListener("DOMContentLoaded", () => {
   // ---- 追加 ----
   addBtn.addEventListener("click", async (e) => {
     e.preventDefault(); // form事故保険
-
+  
     const t = textEl.value.trim();
+  
     if (!t) {
       alert("入力してください");
       return;
     }
-
+  
+    if (t.length > 20) {
+      alert("20文字以内で入力してください");
+      return;
+    }
+  
     const newItem = { text: t, date: new Date().toISOString() };
-
+  
     try {
       const snap = await getDoc(noticeRef);
       if (snap.exists()) {
@@ -149,11 +155,12 @@ document.addEventListener("DOMContentLoaded", () => {
       } else {
         await setDoc(noticeRef, { notices: [newItem] });
       }
-
+  
       textEl.value = "";
     } catch (e2) {
       console.error("[notice-admin] add error:", e2);
       alert("追加に失敗しました（権限/通信）");
     }
   });
+  
 });
