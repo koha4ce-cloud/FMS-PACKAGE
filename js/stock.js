@@ -117,16 +117,31 @@ export function initStock(classId, audit) {
   }
 
   async function addProduct() {
-    const name = document.getElementById("name")?.value?.trim();
-    const price = Number(document.getElementById("price")?.value);
-    const stock = Number(document.getElementById("stock")?.value);
-    const cost = Number(document.getElementById("cost")?.value);
-
-    if (!name && Number.isNaN(price) && Number.isNaN(stock) && Number.isNaN(cost)) {
-      alert("すべての項目を正しく入力してください。");
+    const name = document.getElementById("name")?.value?.trim() ?? "";
+  
+    const priceRaw = document.getElementById("price")?.value?.trim() ?? "";
+    const stockRaw = document.getElementById("stock")?.value?.trim() ?? "";
+    const costRaw  = document.getElementById("cost")?.value?.trim() ?? "";
+  
+    // 1つでも未入力ならNG
+    if (!name || !priceRaw || !stockRaw || !costRaw) {
+      alert("すべての項目を入力してください。");
       return;
     }
-
+  
+    const price = Number(priceRaw);
+    const stock = Number(stockRaw);
+    const cost  = Number(costRaw);
+  
+    // 数字になってない or 0未満（必要なら制限）
+    if (
+      Number.isNaN(price) || Number.isNaN(stock) || Number.isNaN(cost) ||
+      price < 0 || stock < 0 || cost < 0
+    ) {
+      alert("数値項目は0以上の数字で入力してください。");
+      return;
+    }
+  
     try {
       await addDoc(productsCol, {
         name,
@@ -145,18 +160,8 @@ export function initStock(classId, audit) {
       alert("登録に失敗しました（権限/通信）");
     }
   }
-
-  async function rmvProduct(id) {
-    if (!id) return;
-    try {
-      await deleteDoc(doc(db, "Classes", classId, "Products", id));
-      audit?.("PRODUCT_DELETE", { classId, productId: id });
-    } catch (e) {
-      console.error("削除失敗", e);
-      audit?.("PRODUCT_DELETE_FAIL", { classId, productId: id, error: String(e) });
-      alert("削除に失敗しました（権限/通信）");
-    }
-  }
+  
+  
 
   function editProductModal() {
     editMode = true;

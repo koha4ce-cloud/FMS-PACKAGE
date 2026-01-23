@@ -134,7 +134,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const text = String(detailEl.value || "").trim();
 
     if (!dateStr || !text) {
-      alert("日付と内容を入力してください。");
+      alert("日付と内容を入力");
       return;
     }
 
